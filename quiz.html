@@ -26,9 +26,9 @@
         <button id="nextButton" onclick="goNext()" >Next</button>
       </div>
     </div>
-
+    <script src="configuration.js"></script>
     <script>
-      let host = "http://localhost:8080";
+      let host = getHost();
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get("id");
       let quiz = null;
@@ -42,7 +42,14 @@
       startTheQuiz();
 
       async function startTheQuiz() {
-        let response = await fetch(host + "/quizzes/" + id);
+        let request = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getTheToken()
+        }
+      };
+        let response = await fetch(host + "/quizzes/" + id, request);
         quiz = await response.json();
         await displayTheQuestion(0);
       }
@@ -109,12 +116,26 @@
         }
       }
 
+      async function getTheImages(id) {
+        let request = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getTheToken()
+        }
+      };
+      let image = await fetch(getHost() + "/questions/" + id + "/image", request)
+      let imageBlob = image.blob();
+      return imageBlob;
+      }
+
       async function presentTheQuestion(question) {
         item.innerHTML = "";
         let div = document.createElement("div");
-        div.className = "card";        
+        div.className = "card";      
+        let image = await getTheImages(question.id);  
         let innerHtml = `
-         <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+         <img src="${URL.createObjectURL(image)}" alt="question" style="width:100%">
          <div class="container">
            <h4><b>${question.id}</b></h4>
            <p>${question.description}</p>

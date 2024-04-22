@@ -57,16 +57,36 @@
     </form>
 
     <div id="list" class="cards"></div>
-
+    <script src="configuration.js"></script>
     <script>
-      let host = "http://localhost:8080";
+      let host = getHost();
       let questions = [];
       displayTheQuestions();
 
       async function getAll() {
-        let response = await fetch(host + "/questions");
+        let request = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getTheToken()
+        }
+      };
+        let response = await fetch(host + "/questions", request);
         let result = await response.json();
         return result;
+      }
+
+      async function getTheImages(id) {
+        let request = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getTheToken()
+        }
+      };
+      let image = await fetch(getHost() + "/questions/" + id + "/image", request)
+      let imageBlob = image.blob();
+      return imageBlob;
       }
 
       async function displayTheQuestions() {
@@ -80,9 +100,10 @@
         for (let question of questions) {
           let div = document.createElement("div");
           div.className = "card";
+          let image = await getTheImages(question.id);
           let innerHtml = `
          
-        <img src="http://localhost:8080/questions/${question.id}/image" alt="question" style="width:100%">
+        <img src="${URL.createObjectURL(image)}" alt="question" style="width:100%">
         <div class="container">
           <h4><b>${question.id}</b></h4> 
           <p>${question.description}</p>
@@ -133,6 +154,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": "Bearer " + getTheToken()
           },
           body: JSON.stringify(question),
         };
@@ -159,6 +181,9 @@
         formData.append("file", imageFile);
         let request = {
           method: "POST",
+          headers: {
+            "Authorization": "Bearer " + getTheToken()
+          },
           body: formData,
         };
         let response = await fetch(

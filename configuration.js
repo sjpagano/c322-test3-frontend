@@ -1,7 +1,7 @@
-const mode = 0;
+const mode = 1;
 
 const host_local = "http://localhost:8080";
-const host_remote = "https://ducks-service-???.onrender.com";
+const host_remote = "https://ducks-service-latest-5wx9.onrender.com";
 
 function getHost() {
     return (mode == 0) ? host_local : host_remote;
@@ -52,15 +52,15 @@ async function updateTheNavigationBar() {
 
 async function signup() {
     let email = document.getElementById("email").value;
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
-    let customer = {email:email, username: username, password: password}
+    let username = document.getElementById("user").value;
+    let password = document.getElementById("pass").value;
+    let customer = {username:username,password:password,email:email};
     let request = {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(customer)
+        body: JSON.stringify(customer),
       };
       try {
         let response = await fetch(getHost() + "/signup", request);
@@ -114,4 +114,5 @@ async function login() {
 
 async function logout() {   
     removeTheToken();  
+    location.href = "login.html";
 }
